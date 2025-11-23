@@ -87,7 +87,7 @@ pip install -r requirements.txt
 
 ## 🤝 贡献与支持 (Contributing)
 
-我们非常欢迎社区的贡献！如果您有新的功能点子、bug 修复或模型优化建议：
+非常欢迎社区的贡献！如果您有新的功能点子、bug 修复或模型优化建议：
 
 1.  请先在 Issues 页面提交您的想法。
 2.  欢迎 Fork 本仓库并提交 Pull Request。
