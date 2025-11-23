@@ -29,20 +29,15 @@ def start_life():
     print(f"   - 写作时间: 每天 {DIARY_TIME}")
     print("   (程序将在后台静默运行，请不要关闭窗口...)")
 
-    # 1. 马上先测一次，确保存活
     job_monitor()
-
-    # 2. 设置定时任务
-    # 每隔 X 分钟测一次
     schedule.every(CHECK_INTERVAL).minutes.do(job_monitor)
 
-    # 每天固定时间写日记
     schedule.every().day.at(DIARY_TIME).do(job_write_diary)
 
-    # 3. 死循环，保持程序一直运行
+    #死循环，保持程序一直运行
     while True:
         schedule.run_pending()
-        time.sleep(1)  # 每秒醒来检查一下有没有任务到期
+        time.sleep(1) 
 
 
 if __name__ == "__main__":
