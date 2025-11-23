@@ -1,0 +1,17 @@
+# 忽略 Python 编译文件
+__pycache__/
+*.py[cod]
+
+# 忽略虚拟环境
+venv/
+.env
+
+# 忽略本地运行数据 (重要！)
+daily_stats.json
+
+# 忽略生成的日记文件 (保留隐私，你可以手动上传一两篇好的作为示例)
+*_Diary.md
+
+# 忽略 PyCharm/VSCode 配置文件 (可选)
+.idea/
+.vscode/
