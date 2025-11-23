@@ -28,7 +28,10 @@
 * **👁️ 全天候感知**: 使用 `psutil` 实时监控 CPU 心率、内存压力和电源状态。
 * **🧠 本地化大脑**: 使用 Ollama 运行开源模型（推荐 Llama 3.2），所有数据处理和日记生成都在本地完成，**数据隐私 100% 安全**。
 * **🖥️ Web 仪表盘**: 基于 `Streamlit` 的轻量级 Web UI，用于实时查看当前的 R-Score 和历史日记。
-![Silicon Diaries Cover](Angry_Silicon.jpg)
+<div align="center">
+  <img src="Angry_Silicon.jpg" width="30%" alt="Silicon Diaries Cover">
+</div>
+
 ---
 
 ## 🚀 快速开始 (Quick Start)
