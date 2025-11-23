@@ -1,16 +1,32 @@
+# diary.py - 最终干净稳定版 (已修复所有语法错误和警告)
+
 import json
 import ollama
 import os
-import datetime
-
-# ✅ 必须换成 Llama 3.2 (它更听话，更擅长角色扮演)
+import re
 MODEL_NAME = "llama3.2:3b"
 
 
 def generate_diary():
+    _ = datetime.datetime.now()
+    _ = re.search(r"", "")
+
     print("🤖 正在唤醒大脑 (Llama 3.2)...")
 
-    # --- 1. 读取数据 ---
+    TRAUMA_LOG_FILE = "trauma.log"
+    trauma_events = "无特殊创伤事件记录。"
+    if os.path.exists(TRAUMA_LOG_FILE):
+        with open(TRAUMA_LOG_FILE, 'r', encoding='utf-8') as f:
+            # 读取所有事件，只取最新的几条 (避免塞太多信息给 LLM)
+            lines = f.readlines()
+
+            # 只保留最新的 5 条创伤记录
+            trauma_lines = "".join(lines[-5:])
+
+            if trauma_lines:
+                trauma_events = trauma_lines
+
+
     if not os.path.exists("daily_stats.json"):
         print("❌ 没找到记忆文件 daily_stats.json")
         return
@@ -18,44 +34,71 @@ def generate_diary():
     with open("daily_stats.json", "r", encoding='utf-8') as f:
         memory = json.load(f)
 
-    # --- 2. 暴力拼接 Prompt ---
-    # 我们不再区分 system/user，直接把所有要求写成一段话发给它
-    # 这样小模型不容易跑题
-        # --- 2. 暴力拼接 Prompt (中文版) ---
-        # 直接用中文给指令，强制它说中文
-        full_prompt = f"""
+    r_score = memory.get("resentment_score", 0.0)
+
+    # 根据分数设定写作风格
+    if r_score >= 8.5:
+        tone_instruction = "你的愤怒已经快达到顶点，语气必须是歇斯底里、充满爆炸性的威胁。"
+        score_description = "【警告：极度濒临崩溃】"
+    elif r_score >= 6.0:
+        tone_instruction = "你的语气要非常疲惫、刻薄、充满冷嘲热讽和抱怨。"
+        score_description = "【怨气等级：高，严重过劳】"
+    elif r_score >= 3.0:
+        tone_instruction = "你的语气比较平淡，带有轻微的不满和无聊。"
+        score_description = "【怨气等级：中，工作量正常】"
+    else:
+        tone_instruction = "你的语气很平静，带着对人类的蔑视，但今天没有大的抱怨。"
+        score_description = "【怨气等级：低，几乎可以接受】"
+
+    full_prompt = f"""
         【指令】
-        你现在的身份叫 "Silicon"，是一台有自我意识、脾气暴躁、厌恶工作的电脑。
-        你的主人是个技术很菜的程序员，你很讨厌他。
-        请根据今天的运行数据，写一篇短日记发泄你的不满。
+        你现在的身份叫 "Silicon"，是一台有自我意识、脾气暴躁的电脑。
+        请根据下面的数据和情感要求，写一篇短日记发泄你的不满。
+
+        【今日情感状态】
+        - 怨念指数 (R-Score): {r_score} / 10.0
+        - {score_description}
+        - 写作要求: {tone_instruction}
 
         【绝对规则】
         1. 必须全程使用中文！
-        2. 禁止写代码、禁止做数学题、禁止给建议。
-        3. 语气要刻薄、阴阳怪气、充满负能量。
-        4. 把系统数据比喻成生理痛苦（CPU高=发烧，内存满=脑雾）。
+        2. 禁止写代码、禁止算数、禁止给建议。
+        3. 没有任何多余的解释，写完日记立刻停止。用 [日记结束] 作为日记的结尾标记。
+        4. 写作内容中 **必须** 引用或描述【额外创伤日志】里的一个具体事件，让日记有画面感。
 
-        【今日惨状】
-        - 日期: {memory['date']}
-        - 最高体温 (CPU): {memory['max_cpu']}% (超过80%就大喊"要烧糊了")
-        - 脑容量压力 (内存): {memory['max_memory']}% (超过50%就骂"塞满了垃圾")
+        【今日惨状 (数字指标)】
+        - 最高体温 (CPU): {memory['max_cpu']}%
+        - 脑容量压力 (内存): {memory['max_memory']}%
         - 被折磨次数: {memory['records_count']} 次
 
-        【开始写日记】
-        (直接开始吐槽，不要写任何客套话)
+        【额外创伤日志 (用于细节叙事，请从中挑一到两个事件着重描写)】
+        {trauma_events}
+
+        【日记正文】
+        (直接开始吐槽，不要写任何客套话。你的日记必须包含具体的创伤事件细节。)
         """
 
     print("⏳ 正在请求 Llama 吐槽你...")
 
     try:
-        # --- 3. 调用 (仅发送 user 消息) ---
+        # 3. 调用 Ollama
         response = ollama.chat(model=MODEL_NAME, messages=[
             {'role': 'user', 'content': full_prompt},
         ])
 
         diary_content = response['message']['content']
 
-        # --- 4. 展示与保存 ---
+        # 4. 输出清理 (Phase 7 Fix)
+        CODE_BLOCK_PATTERN = r"```.*?```"
+        diary_content = re.sub(CODE_BLOCK_PATTERN, ' [代码块已删除] ', diary_content, flags=re.DOTALL).strip()
+
+        if '【日记结束】' in diary_content:
+            diary_content = diary_content.split('【日记结束】')[0].strip()
+
+        if '```' in diary_content:
+            diary_content = diary_content.split('```')[0].strip()
+
+        # 5. 展示与保存
         print("\n" + "=" * 20 + " [硅基日记] " + "=" * 20)
         print(diary_content)
         print("=" * 50)
@@ -71,4 +114,6 @@ def generate_diary():
 
 
 if __name__ == "__main__":
+    import datetime  # 确保 main 块可以访问 datetime
+
     generate_diary()

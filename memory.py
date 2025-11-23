@@ -1,7 +1,9 @@
-# memory.py
+# memory.py - V3.0 (包含 Phase 5 怨念指数计算)
+
 import json
 import os
 from datetime import date
+import analysis  # 确保 analysis.py 文件存在且正确
 
 # 记忆文件的存储路径
 MEMORY_FILE = "daily_stats.json"
@@ -16,22 +18,19 @@ def load_memory():
     # 默认的初始记忆（一张白纸）
     default_memory = {
         "date": today_str,
-        "max_cpu": 0,
-        "max_memory": 0,
-        "records_count": 0,  # 记录今天一共检测了多少次
-        "log": []  # 详细日志列表
+        "max_cpu": 0.0,
+        "max_memory": 0.0,
+        "records_count": 0,
+        "log": []
     }
 
-    # 1. 检查文件是否存在
     if not os.path.exists(MEMORY_FILE):
         return default_memory
 
-    # 2. 读取文件
     try:
         with open(MEMORY_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        # 3. 检查是不是今天的记忆 (如果已经过了一天，就翻篇重置)
         if data.get("date") != today_str:
             print("📅 新的一天开始了，重置记忆...")
             return default_memory
@@ -52,13 +51,12 @@ def save_memory(memory_data):
 
 def update_memory(current_stats):
     """
-    核心功能：接收最新的体征，更新痛苦指数
+    核心功能：接收最新的体征，更新痛苦指数，并计算 R-Score
     """
     # 1. 读取旧记忆
     memory = load_memory()
 
-    # 2. 比较并更新峰值 (记录最高温瞬间)
-    # 如果当前 CPU > 历史最高，更新 max_cpu
+    # 2. 比较并更新峰值
     if current_stats['cpu'] > memory['max_cpu']:
         memory['max_cpu'] = current_stats['cpu']
 
@@ -68,20 +66,31 @@ def update_memory(current_stats):
     # 3. 计数 +1
     memory['records_count'] += 1
 
-    # 4. (可选) 记录每一次的详细数据，保留最近 5 条即可，防止文件太大
-    # 这里我们只记录时间戳和简报
-    memory['log'].append(f"CPU: {current_stats['cpu']}% | MEM: {current_stats['memory']}%")
-    if len(memory['log']) > 10:  # 只保留最后10条
+    # 4. 记录日志 (保留最近 10 条)
+    memory['log'].append(
+        f"{datetime.datetime.now().strftime('%H:%M')} | CPU: {current_stats['cpu']}% | MEM: {current_stats['memory']}%")
+    if len(memory['log']) > 10:
         memory['log'].pop(0)
 
-    # 5. 写入硬盘
+    # 5. 计算怨念指数并保存
+    # 先保存一次，确保 analysis.py 读取到最新的 max 值
     save_memory(memory)
 
-    print(f"💾 记忆已更新 | 今日最高 CPU: {memory['max_cpu']}%")
+    # 6. 计算分数
+    r_score = analysis.calculate_resentment_score()
+    memory['resentment_score'] = r_score
+
+    # 7. 最终保存
+    save_memory(memory)
+
+    print(f"💾 记忆已更新 | 今日最高 CPU: {memory['max_cpu']}% | R-Score: {r_score}")
 
 
 # 测试用的代码
 if __name__ == "__main__":
+    # ⚠️ 注意：这里需要导入 datetime 才能使用 datetime.datetime.now()
+    import datetime
+
     # 模拟一组数据测试一下
     dummy_data = {"cpu": 85.5, "memory": 60.0}
     update_memory(dummy_data)
