@@ -31,7 +31,7 @@
 * **🖥️ Web 仪表盘**: 基于 `Streamlit` 的轻量级 Web UI，用于实时查看当前的 R-Score 和历史日记。
 
 <div align="center">
-  <img src="Angry_Silicon.jpg" width="60%" alt="Silicon Diaries Cover">
+  <img src="Angry_Silicon.jpg" width="30%" alt="Silicon Diaries Cover">
 </div>
 
 ---
