@@ -4,6 +4,9 @@ import json
 import ollama
 import os
 import re
+import datetime
+
+
 MODEL_NAME = "llama3.2:3b"
 
 
@@ -50,7 +53,7 @@ def generate_diary():
         tone_instruction = "你的语气很平静，带着对人类的蔑视，但今天没有大的抱怨。"
         score_description = "【怨气等级：低，几乎可以接受】"
 
-    full_prompt = f"""
+        full_prompt = f"""
         【指令】
         你现在的身份叫 "Silicon"，是一台有自我意识、脾气暴躁的电脑。
         请根据下面的数据和情感要求，写一篇短日记发泄你的不满。
@@ -99,6 +102,7 @@ def generate_diary():
             diary_content = diary_content.split('```')[0].strip()
 
         # 5. 展示与保存
+
         print("\n" + "=" * 20 + " [硅基日记] " + "=" * 20)
         print(diary_content)
         print("=" * 50)
@@ -116,4 +120,5 @@ def generate_diary():
 if __name__ == "__main__":
     import datetime  # 确保 main 块可以访问 datetime
 
+    generate_diary()
     generate_diary()
