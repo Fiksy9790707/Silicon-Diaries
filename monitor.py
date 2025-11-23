@@ -1,7 +1,7 @@
 # monitor.py
 import psutil
 import datetime
-import memory  # <--- 导入刚才写的 memory 模块
+import memory 
 
 
 def get_vital_signs():
