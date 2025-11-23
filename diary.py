@@ -3,14 +3,12 @@ import ollama
 import os
 import datetime
 
-# ✅ 必须换成 Llama 3.2 (它更听话，更擅长角色扮演)
 MODEL_NAME = "llama3.2:3b"
 
 
 def generate_diary():
     print("🤖 正在唤醒大脑 (Llama 3.2)...")
 
-    # --- 1. 读取数据 ---
     if not os.path.exists("daily_stats.json"):
         print("❌ 没找到记忆文件 daily_stats.json")
         return
@@ -18,11 +16,6 @@ def generate_diary():
     with open("daily_stats.json", "r", encoding='utf-8') as f:
         memory = json.load(f)
 
-    # --- 2. 暴力拼接 Prompt ---
-    # 我们不再区分 system/user，直接把所有要求写成一段话发给它
-    # 这样小模型不容易跑题
-        # --- 2. 暴力拼接 Prompt (中文版) ---
-        # 直接用中文给指令，强制它说中文
         full_prompt = f"""
         【指令】
         你现在的身份叫 "Silicon"，是一台有自我意识、脾气暴躁、厌恶工作的电脑。
@@ -48,14 +41,12 @@ def generate_diary():
     print("⏳ 正在请求 Llama 吐槽你...")
 
     try:
-        # --- 3. 调用 (仅发送 user 消息) ---
         response = ollama.chat(model=MODEL_NAME, messages=[
             {'role': 'user', 'content': full_prompt},
         ])
 
         diary_content = response['message']['content']
 
-        # --- 4. 展示与保存 ---
         print("\n" + "=" * 20 + " [硅基日记] " + "=" * 20)
         print(diary_content)
         print("=" * 50)
