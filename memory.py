@@ -4,6 +4,7 @@ import json
 import os
 from datetime import date
 import analysis  # 确保 analysis.py 文件存在且正确
+import datetime
 
 # 记忆文件的存储路径
 MEMORY_FILE = "daily_stats.json"
@@ -21,7 +22,8 @@ def load_memory():
         "max_cpu": 0.0,
         "max_memory": 0.0,
         "records_count": 0,
-        "log": []
+        "log": [],
+        "resentment_score": 0.0
     }
 
     if not os.path.exists(MEMORY_FILE):
